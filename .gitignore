@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+
+# virtualenv
+venv/
+env/
+.venv/
+
+# Daten, Modelle (nicht öffentlich)
+data/
+model/
+*.pkl
+
+# Editor/OS
+.vscode/
+.idea/
+.DS_Store
+.env

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Symptom-Diagnose</title>
+</head>
+<body>
+    <h1>Symptome eingeben</h1>
+    <form method="post">
+        {% for feature in features %}
+            <label>{{ feature.replace("_", " ").title() }} (0/1):</label>
+            <input type="number" name="{{ feature }}" min="0" max="1" required><br>
+        {% endfor %}
+
+        <button type="submit">Diagnose erstellen</button>
+    </form>
+
+    {% if prediction %}
+    <h2>Vermutete Diagnose: {{ prediction }}</h2>
+    <h3>Wahrscheinlichkeiten:</h3>
+    <ul>
+        {% for name, prob in probabilities %}
+            <li>{{ name }}: {{ "%.2f"|format(prob) }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+</body>
+</html>
+
+
+
+
+
