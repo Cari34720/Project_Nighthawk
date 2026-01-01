@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>Arzt finden</title>
+
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0b1c2d;
+      font-family: Arial, sans-serif;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .box {
+      background: #12263a;
+      padding: 30px;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    h2 {
+      margin-top: 0;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 6px;
+      border: none;
+      font-size: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2ea3ff;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      color: #00203a;
+    }
+
+    button:hover {
+      background: #6ec1ff;
+    }
+
+    #status {
+      margin-top: 15px;
+      font-size: 14px;
+      color: #cfd8e3;
+    }
+
+    ul {
+      margin-top: 10px;
+      padding-left: 18px;
+      font-size: 14px;
+    }
+
+    li {
+      margin-bottom: 6px;
+    }
+
+    .hinweis {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #aab7c4;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+  <h2>Arzt in deiner Nähe finden</h2>
+
+  <input id="stadt" placeholder="Stadt">
+  <input id="land" placeholder="Land">
+
+  <button onclick="suche()">Ärzte anzeigen</button>
+
+  <p id="status"></p>
+  <ul id="liste"></ul>
+
+  <div class="hinweis">
+    Anonyme Suche über öffentliche Kartendaten.<br>
+    Keine Speicherung deiner Eingaben.
+  </div>
+</div>
+
+<script>
+async function suche() {
+  const stadt = document.getElementById("stadt").value;
+  const land = document.getElementById("land").value;
+  const status = document.getElementById("status");
+  const liste = document.getElementById("liste");
+
+  liste.innerHTML = "";
+  status.innerText = "Suche Ärzte …";
+
+  if (!stadt || !land) {
+    status.innerText = "Bitte Stadt und Land eingeben.";
+    return;
+  }
+
+  const query = "Arzt in " + stadt + " " + land;
+  const url =
+    "https://nominatim.openstreetmap.org/search?format=json&q="
+    + encodeURIComponent(query);
+
+  try {
+    const res = await fetch(url);
+    const daten = await res.json();
+
+    if (daten.length === 0) {
+      status.innerText = "Keine Ärzte gefunden.";
+      return;
+    }
+
+    status.innerText = "Gefundene Praxen:";
+    daten.slice(0,10).forEach(d => {
+      const li = document.createElement("li");
+      li.innerText = d.display_name;
+      liste.appendChild(li);
+    });
+
+  } catch (e) {
+    status.innerText = "Fehler bei der Suche.";
+  }
+}
+</script>
+
+</body>
+</html>

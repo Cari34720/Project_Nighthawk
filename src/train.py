@@ -5,14 +5,14 @@ import os
 
 # Pfad zur CSV-Datei dynamisch setzen (unabhängig vom aktuellen Arbeitsverzeichnis)
 base_dir = os.path.dirname(__file__)  # Verzeichnis, in dem train.py liegt
-csv_path = os.path.join(base_dir, "..", "data", "Testing.csv")
+xml_path = os.path.join(base_dir, "..", "data", "symptoms.xml")
 
 # Prüfen, ob die Datei existiert
 if not os.path.exists(csv_path):
     raise FileNotFoundError(f"CSV-Datei nicht gefunden: {csv_path}")
 
 # Daten laden
-df = pd.read_csv(csv_path)
+df = pd.read_xml(xml_path)
 
 # Features und Ziel
 X = df.drop(columns=["prognosis"])

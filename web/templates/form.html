@@ -1,30 +1,248 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="de">
 <head>
-    <title>Symptom-Diagnose</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Project Nighthawk — Diagnosis & World map</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family:"Inter",system-ui;
+      background:linear-gradient(180deg,#030319,#07103a);
+      color:#fff; margin:0; text-align:center;
+    }
+    h1,h2 { margin:10px 0; }
+    form { margin-top:20px; }
+    #map {
+      width:90%;
+      height:600px;
+      margin:40px auto;
+      border-radius:12px;
+      border:2px solid rgba(255,255,255,0.1);
+    }
+    .results {
+      margin-top:20px;
+      background:rgba(255,255,255,0.05);
+      border-radius:10px;
+      padding:12px;
+      width:80%;
+      margin-inline:auto;
+    }
+    .bar {
+      height:12px; border-radius:8px;
+      background:linear-gradient(90deg,#3b6bff,#6b92ff);
+    }
+  </style>
 </head>
 <body>
-    <h1>Symptome eingeben</h1>
-    <form method="post">
-        {% for feature in features %}
-            <label>{{ feature.replace("_", " ").title() }} (0/1):</label>
-            <input type="number" name="{{ feature }}" min="0" max="1" required><br>
-        {% endfor %}
 
-        <button type="submit">Diagnose erstellen</button>
-    </form>
+  <h1>🩺 Project Nighthawk</h1>
+  <p>Symptom-Diagnosis & Disease-World map</p>
 
-    {% if prediction %}
-    <h2>Vermutete Diagnose: {{ prediction }}</h2>
-    <h3>Wahrscheinlichkeiten:</h3>
-    <ul>
-        {% for name, prob in probabilities %}
-            <li>{{ name }}: {{ "%.2f"|format(prob) }}</li>
-        {% endfor %}
-    </ul>
-    {% endif %}
+  <form id="diagnoseForm">
+    <input type="text" id="location" name="location" placeholder="🌍 Enter city or country"
+           style="padding:8px; width:60%; border-radius:6px; border:none;" required><br><br>
+
+    <label><input type="checkbox" value="Fever"> Fever</label>
+    <label><input type="checkbox" value="Cough"> Cough</label>
+    <label><input type="checkbox" value="Headache"> Headache</label>
+    <label><input type="checkbox" value="Tiredness"> Tiredness</label>
+    <label><input type="checkbox" value="Sore throat"> Sore throat</label>
+	<label><input type="checkbox" value="Itching"> Itching</label>
+    <label><input type="checkbox" value="Skin rash"> Skin rash</label>
+    <label><input type="checkbox" value="Nodal skin eruptions"> Nodal skin eruptions</label>
+    <label><input type="checkbox" value="Continuous sneezing"> Continuous sneezing</label>
+    <label><input type="checkbox" value="Chills"> Chills</label>
+	<label><input type="checkbox" value="Joint pain"> Joint pain</label>
+    <label><input type="checkbox" value="Stomach pain"> Stomach pain</label>
+    <label><input type="checkbox" value="Acidity"> Acidity</label>
+    <label><input type="checkbox" value="Ulcers on tongue"> Ulcers on tongue</label>
+    <label><input type="checkbox" value="Muscle wasting"> Muscle wasting</label>
+	<label><input type="checkbox" value="Vomiting"> Vomiting</label>
+    <label><input type="checkbox" value="Burning micturition"> Burning micturition</label>
+    <label><input type="checkbox" value="Spotting urination"> Spotting urination</label>
+    <label><input type="checkbox" value="Fatigue"> Fatigue</label>
+    <label><input type="checkbox" value="Weight gain"> Weight gain</label>
+	<label><input type="checkbox" value="Anxiety"> Anxiety</label>
+    <label><input type="checkbox" value="Cold hands and feets"> Cold hands and feets</label>
+    <label><input type="checkbox" value="Mood swings"> Mood swings</label>
+    <label><input type="checkbox" value="Weight loss"> Weight loss</label>
+    <label><input type="checkbox" value="Restlessness"> Restlessness</label>
+	<label><input type="checkbox" value="Lethargy"> Lethargy</label>
+    <label><input type="checkbox" value="Patches in throat"> Patches in throat</label>
+    <label><input type="checkbox" value="Irrigular sugar level"> Irrigular sugar level</label>
+    <label><input type="checkbox" value="High fever"> High fever</label>
+    <label><input type="checkbox" value="Sunken eyes"> Sunken eyes</label>
+	<label><input type="checkbox" value="Breathlessness"> Breathlessness</label>
+    <label><input type="checkbox" value="Sweating"> Sweating</label>
+    <label><input type="checkbox" value="Dehydration"> Dehydration</label>
+    <label><input type="checkbox" value="Indigestion"> Indigestion</label>
+    <label><input type="checkbox" value="Yellowish skin"> Yellowish skin</label>
+	<label><input type="checkbox" value="Dark urine"> Dark urine</label>
+    <label><input type="checkbox" value="Nausea"> Nausea</label>
+    <label><input type="checkbox" value="Loss of appetite"> Loss of appetite</label>
+    <label><input type="checkbox" value="Pain behind the eyes"> Pain behind the eyes</label>
+    <label><input type="checkbox" value="Back pain"> Back pain</label>
+	<label><input type="checkbox" value="Constipation"> Constipation</label>
+    <label><input type="checkbox" value="Abdominal pain"> Abdominal pain</label>
+    <label><input type="checkbox" value="Diarrhoea"> Diarrhoea</label>
+    <label><input type="checkbox" value="Mild fever"> Mild fever</label>
+    <label><input type="checkbox" value="Yellow Urine"> Yellow Urine</label>
+	<label><input type="checkbox" value="Yellowing of eyes"> Yellowing of eyes</label>
+    <label><input type="checkbox" value="Acute liver failure"> Acute liver failure</label>
+    <label><input type="checkbox" value="Fluid overload"> Fluid overload</label>
+    <label><input type="checkbox" value="Swelling of stomach"> Swelling of stomach</label>
+    <label><input type="checkbox" value="Swelled lymph nodes"> Swelled lymph nodes</label>
+	<label><input type="checkbox" value="Malaise"> Malaise</label>
+    <label><input type="checkbox" value="Blurred and distorted vision"> Blurred and distorted vision</label>
+    <label><input type="checkbox" value="Phlegm"> Phlegm</label>
+    <label><input type="checkbox" value="Throat irritation"> Throat irritation</label>
+	<label><input type="checkbox" value="Redness of eyes"> Redness of eyes</label>
+	<label><input type="checkbox" value="Sinus pressure"> Sinus pressure</label>
+    <label><input type="checkbox" value="Runny nose"> Runny nose</label>
+    <label><input type="checkbox" value="Congestion"> Congestion</label>
+    <label><input type="checkbox" value="Chest pain"> Chest pain</label>
+    <label><input type="checkbox" value="Weakness in limbs"> Weakness in limbs</label>
+	<label><input type="checkbox" value="Fast heart rate"> Fast heart rate</label>
+    <label><input type="checkbox" value="Pain during bowel movements"> Pain during bowel movements</label>
+    <label><input type="checkbox" value="Pain in anal region"> Pain in anal region</label>
+    <label><input type="checkbox" value="Bloody stool"> Bloody stool</label>
+    <label><input type="checkbox" value="Irritation in anus"> Irritation in anus</label>
+	<label><input type="checkbox" value="Neck pain"> Neck pain</label>
+    <label><input type="checkbox" value="Dizziness"> Dizziness</label>
+    <label><input type="checkbox" value="Cramps"> Cramps</label>
+    <label><input type="checkbox" value="Bruising"> Bruising</label>
+    <label><input type="checkbox" value="Obesity"> Obesity</label>
+	<label><input type="checkbox" value="Swollen legs"> Swollen legs</label>
+    <label><input type="checkbox" value="Puffy face and eyes"> Puffy face and eyes</label>
+    <label><input type="checkbox" value="Brittle nails"> Brittle nails</label>
+    <label><input type="checkbox" value="Swollen extremeties"> Swollen extremiets</label>
+    <label><input type="checkbox" value="Excessive hunger"> Excessive hunger</label>
+	<label><input type="checkbox" value="Extra marital contacts"> Extra marital contacts</label>
+    <label><input type="checkbox" value="Drying and tingling lips"> Drying and tingling lips</label>
+    <label><input type="checkbox" value="Slurred speech"> Slurred speech</label>
+    <label><input type="checkbox" value="Knee pain"> Knee pain</label>
+    <label><input type="checkbox" value="Hip joint pain"> Hip joint pain</label>
+	<label><input type="checkbox" value="Muscle weakness"> Muscle weakness</label>
+    <label><input type="checkbox" value="Stiff neck"> Stiff neck</label>
+    <label><input type="checkbox" value="Swelling joints"> Swelling joints</label>
+    <label><input type="checkbox" value="Movement stiffness"> Movement stiffness</label>
+	<label><input type="checkbox" value="Spinning movements"> Spinning movements</label>
+	<label><input type="checkbox" value="Loss of balance"> Loss of balance</label>
+    <label><input type="checkbox" value="Unsteadiness"> Unsteadiness</label>
+    <label><input type="checkbox" value="Weakness of one body side"> Weakness of one body side</label>
+    <label><input type="checkbox" value="Loss of smell"> Loss of smell</label>
+    <label><input type="checkbox" value="Bladder discomfort"> Bladder discomfort</label>
+	<label><input type="checkbox" value="Foul smell of urine"> Foul smell of urine</label>
+    <label><input type="checkbox" value="Continuous feel of urine"> Continuous feel of urine</label>
+    <label><input type="checkbox" value="Passage of gases"> Passage of gases</label>
+    <label><input type="checkbox" value="Internal itching"> Internal itching</label>
+    <label><input type="checkbox" value="Depression"> Depression</label>
+	<label><input type="checkbox" value="Irritability"> Irritability</label>
+    <label><input type="checkbox" value="Muscle pain"> Muscle pain</label>
+    <label><input type="checkbox" value="Altered sensorium "> Altered sensorium</label>
+    <label><input type="checkbox" value="Red spots over body"> Red spots over body</label>
+    <label><input type="checkbox" value="Belly pain"> Belly pain</label>
+	<label><input type="checkbox" value="Abnormal menstruation"> Abnormal menstruation</label>
+    <label><input type="checkbox" value="Watering from eyes"> Watering from eyes</label>
+    <label><input type="checkbox" value="Increased appetite"> Increased appetite</label>
+    <label><input type="checkbox" value="Polyria"> Polyria</label>
+    <label><input type="checkbox" value="Family history"> Family history</label>
+	<label><input type="checkbox" value="Lack of concentration"> Lack of concentration</label>
+    <label><input type="checkbox" value="Visual disturbances"> Visual disturbances</label>
+    <label><input type="checkbox" value="Receiving blood transfusion"> Receiving blood transfusion</label>
+    <label><input type="checkbox" value="Receiving unsterile injections"> Receiving unsterile injections</label>
+    <label><input type="checkbox" value="History of alcohol consumption"> History of alcohol consumption</label>
+	<label><input type="checkbox" value="Blood in sputum"> Bloody in sputum</label>
+    <label><input type="checkbox" value="Prominent veins on calf"> Prominent veins on calf</label>
+    <label><input type="checkbox" value="Painful walking"> Painful walking</label>
+    <label><input type="checkbox" value="pus filled pimples"> Pus filled pimples</label>
+	    <label><input type="checkbox" value="Blackheads"> Blackheads</label>
+    <label><input type="checkbox" value="Scurring"> Scurring</label>
+	<label><input type="checkbox" value="Skin peeling"> Skin peeling</label>
+    <label><input type="checkbox" value="Small dents in nails"> Small dents in nails</label>
+    <label><input type="checkbox" value="Inflammatory nails"> Inflammatory nails</label>
+    <label><input type="checkbox" value="Blister"> Blister</label>
+    <label><input type="checkbox" value="Red sore around nose"> Red sore around nose</label>
+	<label><input type="checkbox" value="Yellow crust ooze"> Yellow crust ooze</label><br><br>
+
+    <button type="submit">Start diagnosis</button>
+  </form>
+
+  <div class="results" id="results" style="display:none;">
+    <h2>Top 3 Diagnosis</h2>
+    <div id="probList"></div>
+  </div>
+
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map').setView([20, 0], 2);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19,
+      attribution:'© OpenStreetMap'
+    }).addTo(map);
+
+    // --- Historische Daten aus Flask ---
+    const records = {{ records|safe }};
+    records.forEach(r => {
+      if (r.location && r.location.lat && r.location.lon) {
+        L.circleMarker([r.location.lat, r.location.lon], {
+          color: "#6b92ff", radius: 7, fillOpacity: 0.7
+        }).addTo(map)
+          .bindPopup(`<b>${r.prediction}</b><br>${r.location.name || ''}<br>${r.timestamp}`);
+      }
+    });
+
+    // --- Diagnose POST ---
+    const form = document.getElementById("diagnoseForm");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const location = document.getElementById("location").value.trim();
+      const symptoms = Array.from(form.querySelectorAll("input[type=checkbox]:checked")).map(cb => cb.value);
+      if (symptoms.length === 0) return alert("Bitte wähle mindestens ein Symptom aus.");
+
+      const response = await fetch("/", {
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({symptoms, location})
+      });
+      const data = await response.json();
+      if (data.error) return alert("Fehler: " + data.error);
+
+      const results = document.getElementById("results");
+      const probList = document.getElementById("probList");
+      results.style.display = "block";
+      probList.innerHTML = "";
+
+      data.probabilities.forEach(p => {
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${p.name}</strong> (${Math.round(p.prob*100)}%)
+          <div class="bar" style="width:${Math.round(p.prob*100)}%"></div>`;
+        probList.appendChild(div);
+      });
+
+      // Standortpunkt live auf Karte anzeigen
+      if (data.location && data.location.lat && data.location.lon) {
+        L.circleMarker([data.location.lat, data.location.lon], {
+          color: "red", radius: 8, fillOpacity: 0.9
+        }).addTo(map)
+          .bindPopup(`<b>${data.prediction}</b><br>${data.location.name || ''}`)
+          .openPopup();
+      }
+    });
+  </script>
 </body>
 </html>
+
+
+
+
 
 
 
